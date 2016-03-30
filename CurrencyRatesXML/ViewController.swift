@@ -9,18 +9,24 @@
 import UIKit
 import Foundation
 
-class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, NSXMLParserDelegate {
 
-    struct bank {
+    /*struct bank {
         var bankName: NSString = ""
         var usdBuy: Float = 0
         var usdSell: Float = 0
         var eurBuy: Float = 0
         var eurSell: Float = 0
-    }
+    }*/
     var xmlParser = NSXMLParser()
-    var arData: [bank] = []
-    var currentBankItem = bank()
+    var arData: [Banks] = []
+    //var currentBankItem: Banks
+    
+    var currentName: String = "";
+    var currentUsdBuy: Float = 0.0;
+    var currentUsdSell: Float = 0.0;
+    var currentEurBuy: Float = 0.0;
+    var currentEurSell: Float = 0.0;
     
     var lastTag = NSString()
     var currentCurrency = NSString()
@@ -28,29 +34,55 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDelegate
 
     var items: [String] = ["We", "Heart", "Swift"]
     
+    var alert = UIAlertController(title: "Loading data", message: "Please wait...", preferredStyle: UIAlertControllerStyle.Alert)
+    
     @IBOutlet weak var loadDataButton: UIButton!
     @IBOutlet weak var resultTableView: UITableView!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        resultTableView.delegate = self
-        resultTableView.dataSource = self
+        //currentBankItem = Banks(name: "", usdBuy: 0, usdSell: 0, eurBuy: 0, eurSell: 0)
+        
+        //resultTableView.delegate = BanksTableViewController.self as? UITableViewDelegate
+        //resultTableView.dataSource = BanksTableViewController.self as? UITableViewDataSource
     }
     
-    func goParsing() {
+    func getDataFromUrl(url: String, callback: (data: NSData?) -> Void) {
+        if let url = NSURL(string: url) {
+            NSURLSession.sharedSession().dataTaskWithURL(url) {
+                (data, response, error) in
+                dispatch_async(dispatch_get_main_queue(), {
+                    callback(data: data)
+                })
+                
+            }.resume()
+        }
+    }
+
+    
+    func parseXmlData(data: NSData?) {
         print("go parsing...")
         
         arData = []
-        let url = NSURL(string: "http://informer.kovalut.ru/webmaster/xml-table.php?kod=7601")
-        xmlParser = NSXMLParser(contentsOfURL: url!)!
-        xmlParser.delegate = self
-        if xmlParser.parse() {
-            print("parsing ok\n")
-            //print(arData)
+        
+        if data === nil {
+            print("!!! no data loaded!")
         } else {
-            print("parsing fucked up!")
+        
+            xmlParser = NSXMLParser(data: data!)//  (contentsOfURL: url!)!
+            xmlParser.delegate = self
+            if xmlParser.parse() {
+                print("parsing ok\n")
+                alert.dismissViewControllerAnimated(true, completion: nil)
+                
+                self.resultTableView.reloadData()
+            } else {
+                print("!!! parsing fucked up!")
+            }
+            
         }
         
     }
@@ -78,14 +110,71 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDelegate
     
         // bank is over - add bank and reset current struct
         if elementName == "Bank" {
-            arData.append(currentBankItem)
             
-            //print(currentBankItem)
+            let bank = Banks(name: currentName, usdBuy: currentUsdBuy, usdSell: currentUsdSell, eurBuy: currentEurBuy, eurSell: currentEurSell)
+            arData.append(bank)
+         
             
-            currentBankItem = bank()
+            //print(bank.name)
+
         }
         
     }
+
+    
+    func parser(parser: NSXMLParser, foundCharacters string: String) {
+        
+        //print("last tag: \(Float(ststring))\n")
+        
+        if lastTag == "Buy" {
+            if !string.isEmpty {
+                
+                let val = prepareFloatValue(string)
+                
+                if currentCurrency == "USD" {
+                    if val > 0 {
+                        currentUsdBuy = val!
+                    }
+                    //print("string: '\(string)'\n")
+                } else {
+                    if val > 0 {
+                        currentUsdSell = val!
+                    }
+                }
+            }
+        }
+        
+        if lastTag == "Sell" {
+            if !string.isEmpty {
+                
+                let val = prepareFloatValue(string)
+                
+                if currentCurrency == "USD" {
+                    if val > 0 {
+                        currentEurBuy = val!
+                    }
+                } else {
+                    if val > 0 {
+                        currentEurSell = val!
+                    }
+                }
+            }
+        }
+        
+        
+        if lastTag == "Name" {
+            let str = prepareStringValue(string)
+            if !str!.isEmpty {
+                currentName = str!
+            }
+        }
+    
+    }
+    
+    func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
+        print("parse error \(parseError)")
+    }
+
     
     func prepareFloatValue(str: String) -> Float? {
         var str = str.stringByReplacingOccurrencesOfString("\n", withString: "")
@@ -102,96 +191,15 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDelegate
         return str
     }
     
-    func parser(parser: NSXMLParser, foundCharacters string: String) {
-        
-        //print("last tag: \(Float(ststring))\n")
-        
-        if lastTag == "Buy" {
-            if !string.isEmpty {
-                
-                let val = prepareFloatValue(string)
-                
-                if currentCurrency == "USD" {
-                    if val > 0 {
-                        currentBankItem.usdBuy = val!
-                    }
-                    //print("string: '\(string)'\n")
-                } else {
-                    if val > 0 {
-                        currentBankItem.eurBuy = val!
-                    }
-                }
-            }
-        }
-        
-        if lastTag == "Sell" {
-            if !string.isEmpty {
-                
-                let val = prepareFloatValue(string)
-                
-                if currentCurrency == "USD" {
-                    if val > 0 {
-                        currentBankItem.usdSell = val!
-                    }
-                } else {
-                    if val > 0 {
-                        currentBankItem.eurSell = val!
-                    }
-                }
-            }
-        }
-        
-        
-        if lastTag == "Name" {
-            let str = prepareStringValue(string)
-            if !str!.isEmpty {
-                currentBankItem.bankName = str!
-            }
-        }
-    
-    }
-    
-    func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
-        print("parse error \(parseError)")
-    }
-
-    
 
     @IBAction func loadDataButtonPressed(sender: AnyObject) {
     
-        goParsing()
-        
-        self.resultTableView.reloadData()
-    
+        self.presentViewController(alert, animated: true, completion: nil)
+        let url = "http://informer.kovalut.ru/webmaster/xml-table.php?kod=7601"
+        getDataFromUrl(url, callback: parseXmlData)
+
     }
-    
-    // MARK:  UITextFieldDelegate Methods
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return arData.count
-    }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("resultTableViewCell", forIndexPath: indexPath)
-        
-        let row = indexPath.row
-        cell.textLabel?.text = arData[row].bankName as String
-        cell.detailTextLabel?.text = "USD: \(arData[row].usdBuy)/\(arData[row].usdSell) EUR: \(arData[row].eurBuy)/\(arData[row].eurSell)"
-        
-        return cell
-    }
-    
-    // MARK:  UITableViewDelegate Methods
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        
-        let row = indexPath.row
-        print(items[row])
-    }
-    
+
         
     
     

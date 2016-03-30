@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B2C1C84B1CAAFBC4001A6073 /* BanksTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C1C84A1CAAFBC4001A6073 /* BanksTableViewController.swift */; };
+		B2C1C8501CAB0166001A6073 /* Banks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C1C84F1CAB0166001A6073 /* Banks.swift */; };
 		B2C78A8F1CA4746300E7A417 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C78A8E1CA4746300E7A417 /* AppDelegate.swift */; };
 		B2C78A911CA4746300E7A417 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C78A901CA4746300E7A417 /* ViewController.swift */; };
 		B2C78A941CA4746300E7A417 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B2C78A921CA4746300E7A417 /* Main.storyboard */; };
@@ -34,6 +36,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B2C1C84A1CAAFBC4001A6073 /* BanksTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BanksTableViewController.swift; sourceTree = "<group>"; };
+		B2C1C84F1CAB0166001A6073 /* Banks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Banks.swift; sourceTree = "<group>"; };
 		B2C78A8B1CA4746300E7A417 /* CurrencyRatesXML.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CurrencyRatesXML.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2C78A8E1CA4746300E7A417 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B2C78A901CA4746300E7A417 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -74,6 +78,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B2C1C84C1CAAFE5A001A6073 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B2C1C84F1CAB0166001A6073 /* Banks.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
 		B2C78A821CA4746300E7A417 = {
 			isa = PBXGroup;
 			children = (
@@ -97,9 +109,11 @@
 		B2C78A8D1CA4746300E7A417 /* CurrencyRatesXML */ = {
 			isa = PBXGroup;
 			children = (
+				B2C1C84C1CAAFE5A001A6073 /* Models */,
 				B2C78A8E1CA4746300E7A417 /* AppDelegate.swift */,
 				B2C78A901CA4746300E7A417 /* ViewController.swift */,
 				B2C78A921CA4746300E7A417 /* Main.storyboard */,
+				B2C1C84A1CAAFBC4001A6073 /* BanksTableViewController.swift */,
 				B2C78A951CA4746300E7A417 /* Assets.xcassets */,
 				B2C78A971CA4746300E7A417 /* LaunchScreen.storyboard */,
 				B2C78A9A1CA4746300E7A417 /* Info.plist */,
@@ -259,6 +273,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2C1C84B1CAAFBC4001A6073 /* BanksTableViewController.swift in Sources */,
+				B2C1C8501CAB0166001A6073 /* Banks.swift in Sources */,
 				B2C78A911CA4746300E7A417 /* ViewController.swift in Sources */,
 				B2C78A8F1CA4746300E7A417 /* AppDelegate.swift in Sources */,
 			);
@@ -485,6 +501,7 @@
 				B2C78AB51CA4746300E7A417 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B2C78AB61CA4746300E7A417 /* Build configuration list for PBXNativeTarget "CurrencyRatesXMLTests" */ = {
 			isa = XCConfigurationList;
@@ -493,6 +510,7 @@
 				B2C78AB81CA4746300E7A417 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B2C78AB91CA4746300E7A417 /* Build configuration list for PBXNativeTarget "CurrencyRatesXMLUITests" */ = {
 			isa = XCConfigurationList;
@@ -501,6 +519,7 @@
 				B2C78ABB1CA4746300E7A417 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
