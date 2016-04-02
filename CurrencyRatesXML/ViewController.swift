@@ -9,7 +9,7 @@
 import UIKit
 import Foundation
 
-class ViewController: UIViewController, NSXMLParserDelegate {
+class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSource, UITableViewDelegate {
 
     /*struct bank {
         var bankName: NSString = ""
@@ -60,6 +60,37 @@ class ViewController: UIViewController, NSXMLParserDelegate {
                 
             }.resume()
         }
+    }
+    
+    
+    // MARK:  UITextFieldDelegate Methods
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return arData.count
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("resultTableViewCell", forIndexPath: indexPath)
+        
+        let row = indexPath.row
+        
+        if let name = arData[row].name {
+            cell.textLabel?.text = name
+            cell.detailTextLabel?.text = "USD: \(arData[row].usdBuy)/\(arData[row].usdSell) EUR: \(arData[row].eurBuy)/\(arData[row].eurSell)"
+        }
+        
+        return cell
+    }
+    
+    // MARK:  UITableViewDelegate Methods
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        
+        //let row = indexPath.row
+        //print(items[row])
     }
 
     
@@ -200,14 +231,30 @@ class ViewController: UIViewController, NSXMLParserDelegate {
 
     }
 
+    
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        print("prepare for segue..")
+        
+        
+        if segue.identifier == "DetailSegue" {
+            let detailViewController = segue.destinationViewController as! DetailViewController
+            let indexPath = resultTableView.indexPathForSelectedRow
+            if let name = arData[indexPath!.row].name {
+                detailViewController.bankName = name
+                print("segue to \(detailViewController.bankName)")
+            }
+        }
+        
+    }
         
     
     
     
-    override func didReceiveMemoryWarning() {
+    /*override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-    }
+    }*/
 
 
 }
