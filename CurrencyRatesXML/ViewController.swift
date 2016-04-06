@@ -33,6 +33,11 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     var lastTag = NSString()
     var currentCurrency = NSString()
     var currentOperation = NSString()
+    
+    var getAddressesByUrl = [String: [String]]()
+    
+    var htmlRequestStarted: Bool = false
+    
 
     //var items: [String] = ["We", "Heart", "Swift"]
     
@@ -50,6 +55,15 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         
         //resultTableView.delegate = BanksTableViewController.self as? UITableViewDelegate
         //resultTableView.dataSource = BanksTableViewController.self as? UITableViewDataSource
+    }
+    
+    
+    func addAddressToBankByUrl(url: String, address: String) {
+        for bank in arData {
+            if bank.url == url {
+                bank.addresses.append(address)
+            }
+        }
     }
     
     func getDataFromUrl(url: String, callback: (data: NSData?) -> Void) {
@@ -90,9 +104,26 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     // MARK:  UITableViewDelegate Methods
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        
-        //let row = indexPath.row
-        //print(items[row])
+    }
+    
+    func getHtmlFromUrl(url: String, callback: (data: NSData?, url: String) -> Void) {
+        if let nsurl = NSURL(string: url) {
+            NSURLSession.sharedSession().dataTaskWithURL(nsurl) {
+                (data, response, error) in
+                dispatch_async(dispatch_get_main_queue(), {
+                    callback(data: data, url: url)
+                })
+            }.resume()
+        }
+    }
+    
+    
+    func getAddressesFromHtml(data: NSData?, url: String) {
+        let doc = TFHpple(HTMLData: data)
+        let elements = doc.searchWithXPathQuery("//tr[@class='br-head']/following-sibling::tr[1]/*[2]")
+        for element in elements {
+            addAddressToBankByUrl(url, address: element.content)
+        }
     }
 
     
@@ -139,6 +170,15 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         // bank is over - add bank and reset current struct
         if elementName == "Bank" {
             let bank = Banks(name: currentName, url: currentUrl, usdBuy: currentUsdBuy, usdSell: currentUsdSell, eurBuy: currentEurBuy, eurSell: currentEurSell)
+            
+            // if has url - get adresses
+            if !(bank.url?.isEmpty)! {
+                htmlRequestStarted = true
+                
+                // TODO: track completeness of address requests done in array
+                
+                getHtmlFromUrl(bank.url!, callback: getAddressesFromHtml)
+            }
             arData.append(bank)
         }
         
@@ -245,7 +285,8 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
             if let url = arData[indexPath!.row].url {
                 //DetailViewController.bankName = name
                 
-                print("getting address from \(url)")
+                print("getting addresses from \(url)")
+                print(arData[indexPath!.row].addresses)
                 print(arData[indexPath!.row])
             }
             

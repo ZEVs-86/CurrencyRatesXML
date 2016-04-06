@@ -12,6 +12,7 @@ class Banks {
     
     var name: String?
     var url: String?
+    var addresses = [String]()
     var usdBuy: Float
     var usdSell: Float
     var eurBuy: Float
