@@ -17,6 +17,7 @@ class Banks {
     var usdSell: Float
     var eurBuy: Float
     var eurSell: Float
+    var ready: Bool!
     
     init(name: String?, url: String?, usdBuy: Float, usdSell: Float, eurBuy:Float, eurSell: Float) {
         self.name = name
@@ -25,6 +26,12 @@ class Banks {
         self.usdSell = usdSell
         self.eurBuy = eurBuy
         self.eurSell = eurSell
+        
+        if !(url?.isEmpty)! {
+            self.ready = false
+        } else {
+            self.ready = true
+        }
     }
     
     

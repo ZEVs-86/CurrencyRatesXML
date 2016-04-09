@@ -38,10 +38,10 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     
     var htmlRequestStarted: Bool = false
     
-
-    //var items: [String] = ["We", "Heart", "Swift"]
-    
     var alert = UIAlertController(title: "Loading data", message: "Please wait...", preferredStyle: UIAlertControllerStyle.Alert)
+    var alertNoUrl = UIAlertController(title: "No addresses for this bank!", message: "", preferredStyle: UIAlertControllerStyle.Alert)
+    let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+
     
     @IBOutlet weak var loadDataButton: UIButton!
     @IBOutlet weak var resultTableView: UITableView!
@@ -49,12 +49,20 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         
-        //currentBankItem = Banks(name: "", usdBuy: 0, usdSell: 0, eurBuy: 0, eurSell: 0)
-        
-        //resultTableView.delegate = BanksTableViewController.self as? UITableViewDelegate
-        //resultTableView.dataSource = BanksTableViewController.self as? UITableViewDataSource
+        // no-url-alert action
+        alertNoUrl.addAction(okAction)
+    }
+    
+    
+    // check array of banks fully loaded 
+    func checkBanksLoaded(arData: [Banks]) -> Bool {
+        for item in arData {
+            if item.ready == false {
+                return false
+            }
+        }
+        return true
     }
     
     
@@ -62,9 +70,15 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         for bank in arData {
             if bank.url == url {
                 bank.addresses.append(address)
+                bank.ready = true
+                
+                if checkBanksLoaded(arData) {
+                    alert.dismissViewControllerAnimated(true, completion: nil)
+                }
             }
         }
     }
+    
     
     func getDataFromUrl(url: String, callback: (data: NSData?) -> Void) {
         if let url = NSURL(string: url) {
@@ -90,14 +104,11 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("resultTableViewCell", forIndexPath: indexPath)
-        
         let row = indexPath.row
-        
         if let name = arData[row].name {
             cell.textLabel?.text = name
             cell.detailTextLabel?.text = "USD: \(arData[row].usdBuy)/\(arData[row].usdSell) EUR: \(arData[row].eurBuy)/\(arData[row].eurSell)"
         }
-        
         return cell
     }
     
@@ -129,18 +140,14 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     
     func parseXmlData(data: NSData?) {
         print("go parsing...")
-        
         arData = []
-        
         if data === nil {
             print("!!! no data loaded!")
         } else {
-        
             xmlParser = NSXMLParser(data: data!)//  (contentsOfURL: url!)!
             xmlParser.delegate = self
             if xmlParser.parse() {
                 print("parsing ok\n")
-                alert.dismissViewControllerAnimated(true, completion: nil)
                 self.resultTableView.reloadData()
             } else {
                 print("!!! parsing fucked up!")
@@ -150,9 +157,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     
     
     func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
-        
         lastTag = elementName
-        
         switch(elementName) {
             case "USD":
                 currentCurrency = "USD"
@@ -165,18 +170,14 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         }
     }
     
-    func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
     
+    func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         // bank is over - add bank and reset current struct
         if elementName == "Bank" {
             let bank = Banks(name: currentName, url: currentUrl, usdBuy: currentUsdBuy, usdSell: currentUsdSell, eurBuy: currentEurBuy, eurSell: currentEurSell)
-            
             // if has url - get adresses
             if !(bank.url?.isEmpty)! {
                 htmlRequestStarted = true
-                
-                // TODO: track completeness of address requests done in array
-                
                 getHtmlFromUrl(bank.url!, callback: getAddressesFromHtml)
             }
             arData.append(bank)
@@ -184,20 +185,15 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         
         if elementName == "Url" {
             currentUrl = tempUrl
-            print(currentUrl)
             tempUrl = ""
         }
-        
     }
 
     
     func parser(parser: NSXMLParser, foundCharacters string: String) {
-
         if lastTag == "Buy" {
             if !string.isEmpty {
-                
                 let val = prepareFloatValue(string)
-                
                 if currentCurrency == "USD" {
                     if val > 0 {
                         currentUsdBuy = val!
@@ -213,9 +209,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         
         if lastTag == "Sell" {
             if !string.isEmpty {
-                
                 let val = prepareFloatValue(string)
-                
                 if currentCurrency == "USD" {
                     if val > 0 {
                         currentEurBuy = val!
@@ -227,7 +221,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
                 }
             }
         }
-        
         
         if lastTag == "Name" {
             let str = prepareStringValue(string)
@@ -241,7 +234,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
                 tempUrl += prepareStringValue(string)!
             }
         }
-    
     }
     
     func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
@@ -266,35 +258,26 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     
 
     @IBAction func loadDataButtonPressed(sender: AnyObject) {
-    
         self.presentViewController(alert, animated: true, completion: nil)
         let url = "http://informer.kovalut.ru/webmaster/xml-table.php?kod=7601"
         getDataFromUrl(url, callback: parseXmlData)
-
     }
-
     
     
     override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
-
-        print("prepare for segue..")
-        
         if identifier == "DetailSegue" {
-            
             let indexPath = resultTableView.indexPathForSelectedRow
             if let url = arData[indexPath!.row].url {
-                //DetailViewController.bankName = name
-                
-                print("getting addresses from \(url)")
-                print(arData[indexPath!.row].addresses)
-                print(arData[indexPath!.row])
+                if url.isEmpty {
+                    self.presentViewController(alertNoUrl, animated: true, completion: nil)
+                } else {
+                    print("getting addresses from \(url)")
+                    print(arData[indexPath!.row].addresses)
+                    print(arData[indexPath!.row])
+                    return true
+                }
             }
-            
-            
         }
-        
-        // TODO: show error alert
-        
         return false
     }
         
