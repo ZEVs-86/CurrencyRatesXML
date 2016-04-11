@@ -22,6 +22,7 @@
 		B2C78AAF1CA4746300E7A417 /* CurrencyRatesXMLUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C78AAE1CA4746300E7A417 /* CurrencyRatesXMLUITests.swift */; };
 		B2D3F8751CB1083C00E5FD8A /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = B2D3F8741CB1083C00E5FD8A /* Podfile */; };
 		B2E6E5701CAEEA3800AAB975 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E6E56F1CAEEA3800AAB975 /* DetailViewController.swift */; };
+		B2E938301CBC227C00E5F3D3 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E9382F1CBC227C00E5F3D3 /* Utils.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +70,7 @@
 		B2C78AB01CA4746300E7A417 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B2D3F8741CB1083C00E5FD8A /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
 		B2E6E56F1CAEEA3800AAB975 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		B2E9382F1CBC227C00E5F3D3 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,6 +158,7 @@
 				B2C78A9A1CA4746300E7A417 /* Info.plist */,
 				B2AE932E1CAFCF5C00E7225D /* CurrencyRatesXML-Bridging-Header.h */,
 				B2D3F8741CB1083C00E5FD8A /* Podfile */,
+				B2E9382F1CBC227C00E5F3D3 /* Utils.swift */,
 			);
 			path = CurrencyRatesXML;
 			sourceTree = "<group>";
@@ -412,6 +415,7 @@
 				B2C78A911CA4746300E7A417 /* ViewController.swift in Sources */,
 				B2C78A8F1CA4746300E7A417 /* AppDelegate.swift in Sources */,
 				B2E6E5701CAEEA3800AAB975 /* DetailViewController.swift in Sources */,
+				B2E938301CBC227C00E5F3D3 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

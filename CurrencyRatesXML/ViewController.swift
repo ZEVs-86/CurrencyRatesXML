@@ -80,19 +80,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     }
     
     
-    func getDataFromUrl(url: String, callback: (data: NSData?) -> Void) {
-        if let url = NSURL(string: url) {
-            NSURLSession.sharedSession().dataTaskWithURL(url) {
-                (data, response, error) in
-                dispatch_async(dispatch_get_main_queue(), {
-                    callback(data: data)
-                })
-                
-            }.resume()
-        }
-    }
-    
-    
     // MARK:  UITextFieldDelegate Methods
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
@@ -116,17 +103,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
-    
-    func getHtmlFromUrl(url: String, callback: (data: NSData?, url: String) -> Void) {
-        if let nsurl = NSURL(string: url) {
-            NSURLSession.sharedSession().dataTaskWithURL(nsurl) {
-                (data, response, error) in
-                dispatch_async(dispatch_get_main_queue(), {
-                    callback(data: data, url: url)
-                })
-            }.resume()
-        }
-    }
+
     
     
     func getAddressesFromHtml(data: NSData?, url: String) {
@@ -138,7 +115,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     }
 
     
-    func parseXmlData(data: NSData?) {
+    func parseXmlData(data: NSData?, url: String?) {
         print("go parsing...")
         arData = []
         if data === nil {
@@ -178,7 +155,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
             // if has url - get adresses
             if !(bank.url?.isEmpty)! {
                 htmlRequestStarted = true
-                getHtmlFromUrl(bank.url!, callback: getAddressesFromHtml)
+                Utils.getDataFromUrl(bank.url!, callback: getAddressesFromHtml)
             }
             arData.append(bank)
         }
@@ -260,7 +237,16 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     @IBAction func loadDataButtonPressed(sender: AnyObject) {
         self.presentViewController(alert, animated: true, completion: nil)
         let url = "http://informer.kovalut.ru/webmaster/xml-table.php?kod=7601"
-        getDataFromUrl(url, callback: parseXmlData)
+        Utils.getDataFromUrl(url, callback: parseXmlData)
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "DetailSegue" {
+            let indexPath = resultTableView.indexPathForSelectedRow
+            let detailViewController = DetailViewController()
+            detailViewController.bankAddresses = arData[indexPath!.row].addresses
+            print(detailViewController.bankAddresses.count)
+        }
     }
     
     
@@ -271,9 +257,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
                 if url.isEmpty {
                     self.presentViewController(alertNoUrl, animated: true, completion: nil)
                 } else {
-                    print("getting addresses from \(url)")
-                    print(arData[indexPath!.row].addresses)
-                    print(arData[indexPath!.row])
+                    
                     return true
                 }
             }

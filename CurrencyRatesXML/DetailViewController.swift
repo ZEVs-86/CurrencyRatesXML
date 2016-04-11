@@ -15,8 +15,9 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var googleMap: UIView!
     //@IBOutlet weak var detailMap: MKMapView!
     var bankName = String()
-    
-    
+    var bankAddresses = [String]()
+
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -36,7 +37,11 @@ class DetailViewController: UIViewController {
 
         //forwardGeocoding("Yaroslavl")
         
+        print("detail did load\n")
+        print(bankAddresses)
+        
     }
+
     
     /*func centerMap(location: CLLocation) {
         let radius: CLLocationDistance = 100
