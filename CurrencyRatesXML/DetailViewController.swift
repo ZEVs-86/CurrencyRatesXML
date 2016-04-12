@@ -10,68 +10,116 @@ import Foundation
 import UIKit
 import MapKit
 
-class DetailViewController: UIViewController {
+class DetailViewController: UIViewController, GMSMapViewDelegate {
     
     @IBOutlet weak var googleMap: UIView!
     //@IBOutlet weak var detailMap: MKMapView!
     var bankName = String()
     var bankAddresses = [String]()
+    var markers = [GMSMarker]()
+    var mapPoints: [MapPoints] = []
+    
+    
+    func getLatLngForZip(address: String) {
+        let addressForUrl = address.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+        let appD = UIApplication.sharedApplication().delegate as! AppDelegate
+        let url = "\(appD.googleMapsGeocoderUrl)address=\(addressForUrl)&key=\(appD.googleMapsKey)"
+        Utils.getDataFromUrlWithParam(url, param:address, callback: parseGeocoderResult)
+    }
+    
 
+    
+    
+    func parseGeocoderResult(data: NSData?, param: String?) {
+        let json = try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+        if let result = json["results"] as? NSArray {
+            if let geometry = result[0]["geometry"] as? NSDictionary {
+                if let location = geometry["location"] as? NSDictionary {
+                    let latitude = location["lat"] as! Double
+                    let longitude = location["lng"] as! Double
+                    
+                    let marker = GMSMarker()
+                    marker.position.longitude = longitude
+                    marker.position.latitude = latitude
+                    markers.append(marker)
+                    
+                    for point in mapPoints {
+                        if point.address == param {
+                            point.lat = latitude
+                            point.lon = longitude
+                            point.ready = true
+                        }
+                    }
+                    
+                    for point in mapPoints {
+                        if point.ready == false {
+                            break
+                        }
+                    }
+                    
+                    print("marker added: \(latitude), \(longitude)")
+
+                    if checkPointsLoaded(mapPoints) {
+                        print("all point loaded")
+                        showPoints()
+                    }
+
+                }
+            }
+        }
+    }
+    
+    
+    func checkPointsLoaded(arData: [MapPoints]) -> Bool {
+        for item in arData {
+            if item.ready == false {
+                return false
+            }
+        }
+        return true
+    }
+    
+    
+    
+    
+    
+    func showPoints() {
+        
+        // show points on map
+        
+        let camera = GMSCameraPosition.cameraWithLatitude(41.887, longitude: -87.622, zoom: 12)
+        let mapView = GMSMapView.mapWithFrame(CGRectZero, camera: camera)
+        var bounds = GMSCoordinateBounds()
+        
+        mapView.mapType = kGMSTypeNormal
+        
+        for point in mapPoints {
+            let marker = GMSMarker()
+            marker.position.latitude = point.lat
+            marker.position.longitude = point.lon
+            marker.snippet = "VTB24"
+            marker.appearAnimation = kGMSMarkerAnimationPop
+            marker.map = mapView
+
+            bounds = bounds.includingCoordinate(marker.position)
+        }
+       
+        
+        mapView.animateWithCameraUpdate(GMSCameraUpdate.fitBounds(bounds))
+        self.view = mapView
+        
+    }
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let camera = GMSCameraPosition.cameraWithLatitude(21.28, longitude: -157.8, zoom: 6)
-        let mapView = GMSMapView.mapWithFrame(CGRectZero, camera: camera)
-        
-        let marker = GMSMarker()
-        marker.position = camera.target
-        marker.snippet = "VTB24"
-        marker.appearAnimation = kGMSMarkerAnimationPop
-        marker.map = mapView
-        
-        
-        self.view = mapView
-        
-        //let location = CLLocation.init(latitude: 21.282778, longitude: -157.829444)
-
-        //forwardGeocoding("Yaroslavl")
-        
-        print("detail did load\n")
-        print(bankAddresses)
+        for address in bankAddresses {
+            let point = MapPoints(address: address)
+            mapPoints.append(point)
+            getLatLngForZip(address)
+        }
         
     }
-
-    
-    /*func centerMap(location: CLLocation) {
-        let radius: CLLocationDistance = 100
-        let region = MKCoordinateRegionMakeWithDistance(location.coordinate, radius * 2, radius * 2)
-        detailMap.setRegion(region, animated: true)
-        
-    }
-    
-    func forwardGeocoding(address: String) {
-        CLGeocoder().geocodeAddressString(address, completionHandler: { (placemarks, error) in
-            if error != nil {
-                print(error)
-                return
-            }
-            if placemarks?.count > 0 {
-                let placemark = placemarks?[0]
-                let location = placemark?.location
-                let coordinate = location?.coordinate
-                print("\nlat: \(coordinate!.latitude), long: \(coordinate!.longitude)")
-                
-                self.centerMap(location!)
-                
-                if placemark?.areasOfInterest?.count > 0 {
-                    let areaOfInterest = placemark!.areasOfInterest![0]
-                    print(areaOfInterest)
-                } else {
-                    print("No area of interest found.")
-                }
-            }
-        })
-    }*/
     
 }

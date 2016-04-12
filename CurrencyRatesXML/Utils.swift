@@ -22,6 +22,15 @@ class Utils {
         }
     }
    
-
+    static func getDataFromUrlWithParam(url: String, param: String?, callback: (data: NSData?, param: String?) -> Void) {
+        if let nsurl = NSURL(string: url) {
+            NSURLSession.sharedSession().dataTaskWithURL(nsurl) {
+                (data, response, error) in
+                dispatch_async(dispatch_get_main_queue(), {
+                    callback(data: data, param: param)
+                })
+                }.resume()
+        }
+    }
     
 }

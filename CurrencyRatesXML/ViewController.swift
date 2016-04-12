@@ -243,9 +243,8 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "DetailSegue" {
             let indexPath = resultTableView.indexPathForSelectedRow
-            let detailViewController = DetailViewController()
-            detailViewController.bankAddresses = arData[indexPath!.row].addresses
-            print(detailViewController.bankAddresses.count)
+            let detailVC = segue.destinationViewController as! DetailViewController
+            detailVC.bankAddresses = arData[indexPath!.row].addresses
         }
     }
     

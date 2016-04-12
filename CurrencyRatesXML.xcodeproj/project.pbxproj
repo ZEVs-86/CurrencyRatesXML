@@ -23,6 +23,7 @@
 		B2D3F8751CB1083C00E5FD8A /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = B2D3F8741CB1083C00E5FD8A /* Podfile */; };
 		B2E6E5701CAEEA3800AAB975 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E6E56F1CAEEA3800AAB975 /* DetailViewController.swift */; };
 		B2E938301CBC227C00E5F3D3 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E9382F1CBC227C00E5F3D3 /* Utils.swift */; };
+		B2ED59781CBD799C00D7EEC5 /* MapPoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2ED59771CBD799C00D7EEC5 /* MapPoints.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +72,7 @@
 		B2D3F8741CB1083C00E5FD8A /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
 		B2E6E56F1CAEEA3800AAB975 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		B2E9382F1CBC227C00E5F3D3 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		B2ED59771CBD799C00D7EEC5 /* MapPoints.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapPoints.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				B2C1C84F1CAB0166001A6073 /* Banks.swift */,
+				B2ED59771CBD799C00D7EEC5 /* MapPoints.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -414,6 +417,7 @@
 				B2C1C8501CAB0166001A6073 /* Banks.swift in Sources */,
 				B2C78A911CA4746300E7A417 /* ViewController.swift in Sources */,
 				B2C78A8F1CA4746300E7A417 /* AppDelegate.swift in Sources */,
+				B2ED59781CBD799C00D7EEC5 /* MapPoints.swift in Sources */,
 				B2E6E5701CAEEA3800AAB975 /* DetailViewController.swift in Sources */,
 				B2E938301CBC227C00E5F3D3 /* Utils.swift in Sources */,
 			);

@@ -13,7 +13,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    var googleMapsKey = "AIzaSyDd6sGb1uhmhv8ndJ-xY1egvy63-LZB5FI"
+
+    var googleMapsKey = "AIzaSyAnghBtawaqb4w1qECXZGCCd9eJdKgyIl0"
+    var googleMapsGeocoderUrl = "https://maps.googleapis.com/maps/api/geocode/json?"
     
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
