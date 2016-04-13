@@ -12,12 +12,15 @@ import MapKit
 
 class DetailViewController: UIViewController, GMSMapViewDelegate {
     
+
     @IBOutlet weak var googleMap: UIView!
     //@IBOutlet weak var detailMap: MKMapView!
     var bankName = String()
     var bankAddresses = [String]()
     var markers = [GMSMarker]()
     var mapPoints: [MapPoints] = []
+    
+    var mapView: GMSMapView!
     
     
     func getLatLngForZip(address: String) {
@@ -26,8 +29,6 @@ class DetailViewController: UIViewController, GMSMapViewDelegate {
         let url = "\(appD.googleMapsGeocoderUrl)address=\(addressForUrl)&key=\(appD.googleMapsKey)"
         Utils.getDataFromUrlWithParam(url, param:address, callback: parseGeocoderResult)
     }
-    
-
     
     
     func parseGeocoderResult(data: NSData?, param: String?) {
@@ -80,18 +81,9 @@ class DetailViewController: UIViewController, GMSMapViewDelegate {
     }
     
     
-    
-    
-    
     func showPoints() {
-        
-        // show points on map
-        
-        let camera = GMSCameraPosition.cameraWithLatitude(41.887, longitude: -87.622, zoom: 12)
-        let mapView = GMSMapView.mapWithFrame(CGRectZero, camera: camera)
+
         var bounds = GMSCoordinateBounds()
-        
-        mapView.mapType = kGMSTypeNormal
         
         for point in mapPoints {
             let marker = GMSMarker()
@@ -99,14 +91,32 @@ class DetailViewController: UIViewController, GMSMapViewDelegate {
             marker.position.longitude = point.lon
             marker.snippet = "VTB24"
             marker.appearAnimation = kGMSMarkerAnimationPop
-            marker.map = mapView
+            marker.map = self.mapView
 
             bounds = bounds.includingCoordinate(marker.position)
+            break
         }
-       
         
-        mapView.animateWithCameraUpdate(GMSCameraUpdate.fitBounds(bounds))
-        self.view = mapView
+        self.mapView.animateWithCameraUpdate(GMSCameraUpdate.fitBounds(bounds))
+        //self.view = mapView
+        
+        print("show real points")
+        
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+
+        
+        self.mapView = GMSMapView(frame: self.googleMap.frame)
+        self.mapView.mapType = kGMSTypeNormal
+        self.view = self.mapView
+        
+        for address in bankAddresses {
+            let point = MapPoints(address: address)
+            mapPoints.append(point)
+            getLatLngForZip(address)
+        }
         
     }
     
@@ -114,11 +124,29 @@ class DetailViewController: UIViewController, GMSMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        for address in bankAddresses {
-            let point = MapPoints(address: address)
-            mapPoints.append(point)
-            getLatLngForZip(address)
-        }
+        print("view did load")
+        
+
+        
+        /*let camera = GMSCameraPosition.cameraWithLatitude(41.887, longitude: -87.622, zoom: 12)
+        let mapView = GMSMapView.mapWithFrame(CGRectZero, camera: camera)
+        var bounds = GMSCoordinateBounds()
+        
+        let marker = GMSMarker()
+        marker.position.latitude = 57.6322517
+        marker.position.longitude = 39.8842473
+        marker.map = mapView
+        bounds = bounds.includingCoordinate(marker.position)
+        
+        let marker2 = GMSMarker()
+        marker2.position.latitude = 58.6322517
+        marker2.position.longitude = 39.8842473
+        marker2.map = mapView
+        bounds = bounds.includingCoordinate(marker2.position)
+        
+        mapView.animateWithCameraUpdate(GMSCameraUpdate.fitBounds(bounds))
+        self.view = mapView
+        */
         
     }
     
