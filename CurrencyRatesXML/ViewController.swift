@@ -55,22 +55,32 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     }
     
     
-    // check array of banks fully loaded 
+    // check array of banks fully loaded with coords
     func checkBanksLoaded(arData: [Banks]) -> Bool {
-        for item in arData {
-            if item.ready == false {
+        for bank in arData {
+            if bank.ready == false {
                 return false
+            }
+            for marker in bank.markers {
+                if marker.ready == false {
+                    return false
+                }
             }
         }
         return true
     }
     
-    
     func addAddressToBankByUrl(url: String, address: String) {
         for bank in arData {
             if bank.url == url {
                 bank.addresses.append(address)
+                
                 bank.ready = true
+                
+                let marker = MapPoints(address: address)
+                bank.markers.append(marker)
+                
+                getLatLngForZip(address)
                 
                 if checkBanksLoaded(arData) {
                     alert.dismissViewControllerAnimated(true, completion: nil)
@@ -79,6 +89,90 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         }
     }
     
+    
+    //////////////
+    // Geocoder //
+    //////////////
+    
+    func getLatLngForZip(address: String) {
+        let addressForUrl = address.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+        let appD = UIApplication.sharedApplication().delegate as! AppDelegate
+        let url = "\(appD.googleMapsGeocoderUrl)address=\(addressForUrl)&key=\(appD.googleMapsKey)"
+        Utils.getDataFromUrlWithParam(url, param:address, callback: parseGeocoderResult)
+    }
+    
+    func parseGeocoderResult(data: NSData?, param: String?) {
+        let json = try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
+        if let result = json["results"] as? NSArray {
+            if let geometry = result[0]["geometry"] as? NSDictionary {
+                if let location = geometry["location"] as? NSDictionary {
+                    let latitude = location["lat"] as! Double
+                    let longitude = location["lng"] as! Double
+                    
+                    let marker = GMSMarker()
+                    marker.position.longitude = longitude
+                    marker.position.latitude = latitude
+                    //markers.append(marker)
+                    
+                    
+                    let bank = getBankByAddress(param!)
+                    if bank != nil {
+                        for point in bank!.markers {
+                            if point.address == param {
+                                point.lat = latitude
+                                point.lon = longitude
+                                point.ready = true
+                            }
+                        }
+                    
+                        for point in bank!.markers {
+                            if point.ready == false {
+                                break
+                            }
+                        }
+                    
+                        print("marker added: \(latitude), \(longitude)")
+                        
+                        //newMarker.ready = true
+                        
+                        // TODO: add coords to marker and check all banks is loaded
+                        
+                        
+                        
+                        if checkPointsLoaded(bank!.markers) {
+                            print("all point loaded")
+                            //showPoints()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func checkPointsLoaded(arData: [MapPoints]) -> Bool {
+        for item in arData {
+            if item.ready == false {
+                return false
+            }
+        }
+        return true
+    }
+    
+    func getBankByAddress(address: String) -> Banks? {
+        for bank in arData {
+            for bankAddress in bank.addresses {
+                if address == bankAddress {
+                    return bank
+                }
+            }
+        }
+        return nil
+    }
+    
+
+    /////////////////
+    // XML Parsing //
+    /////////////////
     
     // MARK:  UITextFieldDelegate Methods
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -104,8 +198,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
 
-    
-    
     func getAddressesFromHtml(data: NSData?, url: String) {
         let doc = TFHpple(HTMLData: data)
         let elements = doc.searchWithXPathQuery("//tr[@class='br-head']/following-sibling::tr[1]/*[2]")
@@ -114,7 +206,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         }
     }
 
-    
     func parseXmlData(data: NSData?, url: String?) {
         print("go parsing...")
         arData = []
@@ -132,7 +223,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         }
     }
     
-    
     func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         lastTag = elementName
         switch(elementName) {
@@ -146,7 +236,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
                 break;
         }
     }
-    
     
     func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         // bank is over - add bank and reset current struct
@@ -233,6 +322,10 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         return str
     }
     
+    
+    ///////////////////
+    // View's events //
+    ///////////////////
 
     @IBAction func loadDataButtonPressed(sender: AnyObject) {
         self.presentViewController(alert, animated: true, completion: nil)
@@ -252,6 +345,9 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
         if identifier == "DetailSegue" {
             let indexPath = resultTableView.indexPathForSelectedRow
+            
+            print(arData[indexPath!.row].markers)
+            
             if let url = arData[indexPath!.row].url {
                 if url.isEmpty {
                     self.presentViewController(alertNoUrl, animated: true, completion: nil)

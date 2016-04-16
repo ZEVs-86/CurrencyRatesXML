@@ -23,62 +23,9 @@ class DetailViewController: UIViewController, GMSMapViewDelegate {
     var mapView: GMSMapView!
     
     
-    func getLatLngForZip(address: String) {
-        let addressForUrl = address.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
-        let appD = UIApplication.sharedApplication().delegate as! AppDelegate
-        let url = "\(appD.googleMapsGeocoderUrl)address=\(addressForUrl)&key=\(appD.googleMapsKey)"
-        Utils.getDataFromUrlWithParam(url, param:address, callback: parseGeocoderResult)
-    }
+        
     
-    
-    func parseGeocoderResult(data: NSData?, param: String?) {
-        let json = try! NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as! NSDictionary
-        if let result = json["results"] as? NSArray {
-            if let geometry = result[0]["geometry"] as? NSDictionary {
-                if let location = geometry["location"] as? NSDictionary {
-                    let latitude = location["lat"] as! Double
-                    let longitude = location["lng"] as! Double
-                    
-                    let marker = GMSMarker()
-                    marker.position.longitude = longitude
-                    marker.position.latitude = latitude
-                    markers.append(marker)
-                    
-                    for point in mapPoints {
-                        if point.address == param {
-                            point.lat = latitude
-                            point.lon = longitude
-                            point.ready = true
-                        }
-                    }
-                    
-                    for point in mapPoints {
-                        if point.ready == false {
-                            break
-                        }
-                    }
-                    
-                    print("marker added: \(latitude), \(longitude)")
 
-                    if checkPointsLoaded(mapPoints) {
-                        print("all point loaded")
-                        showPoints()
-                    }
-
-                }
-            }
-        }
-    }
-    
-    
-    func checkPointsLoaded(arData: [MapPoints]) -> Bool {
-        for item in arData {
-            if item.ready == false {
-                return false
-            }
-        }
-        return true
-    }
     
     
     func showPoints() {
@@ -112,11 +59,11 @@ class DetailViewController: UIViewController, GMSMapViewDelegate {
         self.mapView.mapType = kGMSTypeNormal
         self.view = self.mapView
         
-        for address in bankAddresses {
+        /*for address in bankAddresses {
             let point = MapPoints(address: address)
             mapPoints.append(point)
-            getLatLngForZip(address)
-        }
+            //getLatLngForZip(address)
+        }*/
         
     }
     
