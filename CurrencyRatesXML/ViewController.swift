@@ -59,10 +59,13 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     func checkBanksLoaded(arData: [Banks]) -> Bool {
         for bank in arData {
             if bank.ready == false {
+                //print("bank is not ready")
                 return false
             }
             for marker in bank.markers {
                 if marker.ready == false {
+                    
+                    print("marker is not ready address:\(marker.address) bank: \(bank.name)")
                     return false
                 }
             }
@@ -82,9 +85,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
                 
                 getLatLngForZip(address)
                 
-                if checkBanksLoaded(arData) {
-                    alert.dismissViewControllerAnimated(true, completion: nil)
-                }
+
             }
         }
     }
@@ -115,37 +116,45 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
                     //markers.append(marker)
                     
                     
-                    let bank = getBankByAddress(param!)
-                    if bank != nil {
-                        for point in bank!.markers {
-                            if point.address == param {
+                    let banks = getBanksByAddress(param!)    // two banks can have the same address %)
+                    for bank in banks {
+                        
+                        for point in bank.markers {
+                            if point.address == param && !point.ready {
                                 point.lat = latitude
                                 point.lon = longitude
                                 point.ready = true
                             }
                         }
                     
-                        for point in bank!.markers {
+                        for point in bank.markers {
                             if point.ready == false {
                                 break
                             }
                         }
-                    
-                        print("marker added: \(latitude), \(longitude)")
-                        
-                        //newMarker.ready = true
+                        print("marker added: \(latitude), \(longitude) address: \(param) to bank \(bank.name)")
                         
                         // TODO: add coords to marker and check all banks is loaded
                         
-                        
-                        
-                        if checkPointsLoaded(bank!.markers) {
+                        if checkPointsLoaded(bank.markers) {
                             print("all point loaded")
-                            //showPoints()
+                            
+                            bank.ready = true
+                            if checkBanksLoaded(arData) {
+                                
+                                alert.dismissViewControllerAnimated(true, completion: nil)
+                                
+                            }
                         }
+                      
                     }
+                    
+
                 }
             }
+        } else {
+            print("address not loaded: \(param)")
+            print(json)
         }
     }
     
@@ -158,15 +167,16 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         return true
     }
     
-    func getBankByAddress(address: String) -> Banks? {
+    func getBanksByAddress(address: String) -> [Banks] {
+        var banks = [Banks]()
         for bank in arData {
             for bankAddress in bank.addresses {
                 if address == bankAddress {
-                    return bank
+                    banks.append(bank)
                 }
             }
         }
-        return nil
+        return banks
     }
     
 
@@ -337,7 +347,7 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
         if segue.identifier == "DetailSegue" {
             let indexPath = resultTableView.indexPathForSelectedRow
             let detailVC = segue.destinationViewController as! DetailViewController
-            detailVC.bankAddresses = arData[indexPath!.row].addresses
+            detailVC.mapPoints = arData[indexPath!.row].markers
         }
     }
     
@@ -345,8 +355,6 @@ class ViewController: UIViewController, NSXMLParserDelegate, UITableViewDataSour
     override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
         if identifier == "DetailSegue" {
             let indexPath = resultTableView.indexPathForSelectedRow
-            
-            print(arData[indexPath!.row].markers)
             
             if let url = arData[indexPath!.row].url {
                 if url.isEmpty {
